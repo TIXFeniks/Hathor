@@ -4,20 +4,28 @@ STRIDE_MU = 20 #expected value of stride
 STRIDE_SIG = 2 #standard standard deviation of stride
 
 import sys
+import os
 from os import listdir
 from random import choice
 from midi_preproc import midiToMatrix
 import numpy as np
 import scipy
 from prefetch_generator import background
+import pickle as pkl
 
 bad_files = []
 
+if os.path.isfile('bad_files.pkl'):
+    with open('bad_files.pkl','rb') as f:
+        bad_files = pkl.load(f)
+
 #all files in storage
 files = [each for each in listdir('midi') if each.endswith('.mid') and (not ('midi/'+each in bad_files))]
+files_precomp = [each for each in files if os.path.isfile("midi/"+each+'.prep')]
 
-def split_random_file():#returns sparse matrix every SEQ_LEN rows of wich are cut from the vectorized midi file
-    fi = choice(files)#select random midi file
+
+def split_random_file(precomputed=False):#returns sparse matrix every SEQ_LEN rows of wich are cut from the vectorized midi file
+    fi = choice(files_precomp) if precomputed else choice(files)#select random midi file
     
     cut = []
     
@@ -35,13 +43,13 @@ def split_random_file():#returns sparse matrix every SEQ_LEN rows of wich are cu
     else:
         return scipy.sparse.csc_matrix(np.zeros(shape=(0,129)))
     
-def generate_minibatch(batch_size=32):
+def generate_minibatch(batch_size=32, precomputed=True):
     res = []
     while(sum([x.shape[0] for x in res])/SEQ_LEN <= batch_size):
-        res.append(split_random_file())
+        res.append(split_random_file(precomputed))
     return scipy.sparse.vstack(res,format='csr')
 
-@background(max_prefetch=10)
-def iterate_minibatches(num_batches, batch_size=32):
+#@background(max_prefetch=10)
+def iterate_minibatches(num_batches, batch_size=32, precomputed=True):
     for i in xrange(num_batches):
-        yield generate_minibatch(batch_size)
+        yield generate_minibatch(batch_size,precomputed)

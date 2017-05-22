@@ -2,6 +2,11 @@
 from music21 import converter, stream, note, chord, duration, pitch
 from scipy.sparse import csc_matrix
 
+import os.path
+
+
+import pickle as pkl
+
 import numpy as np
 
 instruments = ['Piano']
@@ -11,6 +16,9 @@ _midi2mat = {}
 def midiToMatrix(filename):
     if filename in _midi2mat:
         return _midi2mat[filename]
+    if os.path.isfile(filename+'.prep') :
+        f = open(filename+'.prep', 'rb')
+        return pkl.load(f)
     parsed = converter.parse(filename)
 
     party = []
@@ -30,6 +38,8 @@ def midiToMatrix(filename):
                     #text += dur_to_text(thisNote.duration.type)+'z'
     res= csc_matrix(party) if len(party) > 0 else csc_matrix(np.zeros((0,129)))
     _midi2mat[filename] = res
+    with open(filename+'.prep', 'wb') as f:
+        pkl.dump(res,f)
     return res;
 
 from music21 import midi
