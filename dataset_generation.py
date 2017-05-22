@@ -37,7 +37,7 @@ def split_random_file():#returns sparse matrix every SEQ_LEN rows of wich are cu
     
 def generate_minibatch(batch_size=32):
     res = []
-    while(sum([x.shape[0] for x in res])/SEQ_LEN < batch_size):
+    while(sum([x.shape[0] for x in res])/SEQ_LEN <= batch_size):
         res.append(split_random_file())
     return scipy.sparse.vstack(res,format='csr')
 
