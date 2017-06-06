@@ -1,5 +1,5 @@
 # Hathor
 Hathor is a neural network, that generates music
 ### TODO:
-  - try GAN
-  - try a bigger dataset
+  - train GAN
+  - Make parser fast enough to process a bigger dataset
