@@ -13,6 +13,16 @@ import scipy
 from prefetch_generator import background
 import pickle as pkl
 
+import tqdm as tqdm
+def parallelization(fun,massive,tq = True):    
+    num_cores = 20#multiprocessing.cpu_count()
+    if tq:
+        results = np.array(Parallel(n_jobs=num_cores)(delayed(fun)(i) for i in tqdm(massive)))
+        return results
+    else:
+        results = Parallel(n_jobs=num_cores)(delayed(fun)(i) for i in massive)
+        return results
+
 bad_files = []
 
 if os.path.isfile('bad_files.pkl'):
@@ -47,7 +57,9 @@ def generate_minibatch(batch_size=32, precomputed=True):
     res = []
     while(sum([x.shape[0] for x in res])/SEQ_LEN <= batch_size):
         res.append(split_random_file(precomputed))
-    return scipy.sparse.vstack(res,format='csr')
+    res = scipy.sparse.vstack(res,format='csr')
+    
+    return res[:SEQ_LEN * batch_size]
 
 #@background(max_prefetch=10)
 def iterate_minibatches(num_batches, batch_size=32, precomputed=True):
