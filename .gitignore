@@ -1,0 +1,4 @@
+midi/
+output/*
+*.mid
+*.mp3
