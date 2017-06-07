@@ -31,7 +31,7 @@ if os.path.isfile('bad_files.pkl'):
 
 #all files in storage
 files = [each for each in listdir('midi') if each.endswith('.mid') and (not ('midi/'+each in bad_files))]
-files_precomp = [each for each in files if os.path.isfile("midi/"+each+'.prep')]
+files_precomp = [each[:-5] for each in listdir('midi') if each.endswith('.prep')]
 
 
 def split_random_file(precomputed=False):#returns sparse matrix every SEQ_LEN rows of wich are cut from the vectorized midi file
